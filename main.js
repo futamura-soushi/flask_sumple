@@ -55,8 +55,10 @@ const token = new SkyWayAuthToken({
 
     const myId = document.getElementById('my-id');
     const joinButton = document.getElementById('join');
+
+    const environmentConstraints = {video: {facingMode: {exact: "environment"}}}; //背面カメラ？
   
-    const { audio, video } = await SkyWayStreamFactory.createMicrophoneAudioAndCameraStream(); // 2
+    const { audio, video } = await SkyWayStreamFactory.createMicrophoneAudioAndCameraStream(environmentConstraints); // 2
   
     video.attach(localVideo); // 3
     await localVideo.play(); // 4
