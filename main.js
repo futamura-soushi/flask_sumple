@@ -58,7 +58,7 @@ const token = new SkyWayAuthToken({
 
     const environmentConstraints = {video: {facingMode: {exact: "environment"}}}; //背面カメラ？
   
-    const { audio, video } = await SkyWayStreamFactory.createMicrophoneAudioAndCameraStream(environmentConstraints); // 2
+    const { video } = await SkyWayStreamFactory.createMicrophoneAudioAndCameraStream(environmentConstraints); // 2
   
     video.attach(localVideo); // 3
     await localVideo.play(); // 4
@@ -77,7 +77,6 @@ const token = new SkyWayAuthToken({
       myId.textContent = me.id;
 
        //自分の映像と音声を配信する  publish関数
-      await me.publish(audio);
       await me.publish(video);
 
       //相手の映像と音声をsubscribeする
@@ -98,11 +97,6 @@ const token = new SkyWayAuthToken({
             case 'video':
               newMedia = document.createElement('video');
               newMedia.playsInline = true;
-              newMedia.autoplay = true;
-              break;
-            case 'audio':
-              newMedia = document.createElement('audio');
-              newMedia.controls = true;
               newMedia.autoplay = true;
               break;
             default:
