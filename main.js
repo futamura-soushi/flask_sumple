@@ -6,7 +6,7 @@ const token = new SkyWayAuthToken({
   exp: nowInSec() + 60 * 60 * 24,
   scope: {
     app: {
-      id: 'ここにアプリケーションIDをペーストしてください',
+      id: 'b4a3adf1-e60d-4019-91f8-8adffdd552c0',
       turn: true,
       actions: ['read'],
       channels: [
@@ -41,7 +41,7 @@ const token = new SkyWayAuthToken({
       ],
     },
   },
-}).encode('ここにシークレットキーをペーストしてください');
+}).encode('BHgTmZ5Z85jpptlPXD8kW5JDQk4jo66dWWmMlJwNoQU=');
 
 (async () => {
   const localVideo = document.getElementById('local-video');
