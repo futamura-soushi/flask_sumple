@@ -1,5 +1,123 @@
 const { nowInSec, SkyWayAuthToken, SkyWayContext, SkyWayRoom, SkyWayStreamFactory, uuidV4 } = skyway_room;
 
+const token = new SkyWayAuthToken({
+  jti: uuidV4(),
+  iat: nowInSec(),
+  exp: nowInSec() + 60 * 60 * 24,
+  scope: {
+    app: {
+      id: 'ここにアプリケーションIDをペーストしてください',
+      turn: true,
+      actions: ['read'],
+      channels: [
+        {
+          id: '*',
+          name: '*',
+          actions: ['write'],
+          members: [
+            {
+              id: '*',
+              name: '*',
+              actions: ['write'],
+              publication: {
+                actions: ['write'],
+              },
+              subscription: {
+                actions: ['write'],
+              },
+            },
+          ],
+          sfuBots: [
+            {
+              actions: ['write'],
+              forwardings: [
+                {
+                  actions: ['write'],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  },
+}).encode('ここにシークレットキーをペーストしてください');
+
+(async () => {
+  const localVideo = document.getElementById('local-video');
+  const buttonArea = document.getElementById('button-area');
+  const remoteMediaArea = document.getElementById('remote-media-area');
+  const roomNameInput = document.getElementById('room-name');
+
+  const myId = document.getElementById('my-id');
+  const joinButton = document.getElementById('join');
+
+  if (navigator.userAgentData && navigator.userAgentData.mobile) {
+    const environmentConstraints = {video: {facingMode: {exact: "environment"}}};
+     var { audio, video } =
+    await SkyWayStreamFactory.createMicrophoneAudioAndCameraStream(environmentConstraints);
+  } else {
+     var { audio, video } =
+    await SkyWayStreamFactory.createMicrophoneAudioAndCameraStream();
+    console.log(navigator.userAgentData.mobile);
+  }
+  
+  video.attach(localVideo);
+  await localVideo.play();
+
+  joinButton.onclick = async () => {
+    if (roomNameInput.value === '') return;
+
+    const context = await SkyWayContext.Create(token);
+    const room = await SkyWayRoom.FindOrCreate(context, {
+      type: 'p2p',
+      name: roomNameInput.value,
+    });
+    const me = await room.join();
+
+    myId.textContent = me.id;
+
+    await me.publish(audio);
+    await me.publish(video);
+
+    const subscribeAndAttach = (publication) => {
+      if (publication.publisher.id === me.id) return;
+
+      const subscribeButton = document.createElement('button');
+      subscribeButton.textContent = `${publication.publisher.id}: ${publication.contentType}`;
+      buttonArea.appendChild(subscribeButton);
+
+      subscribeButton.onclick = async () => {
+        const { stream } = await me.subscribe(publication.id);
+
+        let newMedia;
+        switch (stream.track.kind) {
+          case 'video':
+            newMedia = document.createElement('video');
+            newMedia.playsInline = true;
+            newMedia.autoplay = true;
+            break;
+          case 'audio':
+            newMedia = document.createElement('audio');
+            newMedia.controls = true;
+            newMedia.autoplay = true;
+            break;
+          default:
+            return;
+        }
+        stream.attach(newMedia);
+        remoteMediaArea.appendChild(newMedia);
+      };
+    };
+
+    room.publications.forEach(subscribeAndAttach);
+    room.onStreamPublished.add((e) => subscribeAndAttach(e.publication));
+  };
+})();
+
+//テスト
+/*const { nowInSec, SkyWayAuthToken, SkyWayContext, SkyWayRoom, SkyWayStreamFactory, uuidV4 } = skyway_room;
+
 //SkyWay Auth Tokenの作成
 const token = new SkyWayAuthToken({
     jti: uuidV4(),
@@ -44,8 +162,7 @@ const token = new SkyWayAuthToken({
     },
   }).encode('BHgTmZ5Z85jpptlPXD8kW5JDQk4jo66dWWmMlJwNoQU=');  //シークレットキー
 
-  console.log(navigator.userAgentData.mobile);
-
+  
   //カメラ映像、マイク音声の取得
   (async () => {
     // 1
@@ -57,7 +174,7 @@ const token = new SkyWayAuthToken({
     const myId = document.getElementById('my-id');
     const joinButton = document.getElementById('join');
 
-    if (navigator.userAgentData.mobile){
+    if (navigator.userAgent.match(/iPhone|Android.+Mobile/)){
     const environmentConstraints = {video: {facingMode: {exact: "environment"}}}; //背面カメラ？
   
     const { video } = await SkyWayStreamFactory.createMicrophoneAudioAndCameraStream(environmentConstraints); // 2
@@ -122,7 +239,7 @@ const token = new SkyWayAuthToken({
     });
    
   };
-  })(); // 1
+  })(); // 1*/
 
 
 
