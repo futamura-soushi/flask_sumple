@@ -44,6 +44,7 @@ const token = new SkyWayAuthToken({
     },
   }).encode('BHgTmZ5Z85jpptlPXD8kW5JDQk4jo66dWWmMlJwNoQU=');  //シークレットキー
 
+  console.log(navigator.userAgentData.mobile);
 
   //カメラ映像、マイク音声の取得
   (async () => {
@@ -56,10 +57,13 @@ const token = new SkyWayAuthToken({
     const myId = document.getElementById('my-id');
     const joinButton = document.getElementById('join');
 
+    if (navigator.userAgentData.mobile){
     const environmentConstraints = {video: {facingMode: {exact: "environment"}}}; //背面カメラ？
   
     const { video } = await SkyWayStreamFactory.createMicrophoneAudioAndCameraStream(environmentConstraints); // 2
-  
+    }else{
+    const { video } = await SkyWayStreamFactory.createMicrophoneAudioAndCameraStream(); // 2
+    }
     video.attach(localVideo); // 3
     await localVideo.play(); // 4
 
