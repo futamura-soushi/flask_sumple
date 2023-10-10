@@ -63,21 +63,21 @@ const token = new SkyWayAuthToken({
   }
   
   video.attach(localVideo);
-  await localVideo.play();
+  //await localVideo.play();
 
   joinButton.onclick = async () => {
     if (roomNameInput.value === '') return;
 
     const context = await SkyWayContext.Create(token);
     const room = await SkyWayRoom.FindOrCreate(context, {
-      type: 'p2p',
+      type: 'sfu',
       name: roomNameInput.value,
     });
     const me = await room.join();
 
     myId.textContent = me.id;
 
-    await me.publish(audio);
+    //await me.publish(audio);
     await me.publish(video);
 
     const subscribeAndAttach = (publication) => {
@@ -96,6 +96,7 @@ const token = new SkyWayAuthToken({
             newMedia = document.createElement('video');
             newMedia.playsInline = true;
             newMedia.autoplay = true;
+            newMedia.width = 1000;
             break;
           case 'audio':
             newMedia = document.createElement('audio');
